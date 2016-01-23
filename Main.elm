@@ -26,14 +26,18 @@ nuevoTema titulo duracion id= {
 modeloInicial : Model
 modeloInicial = [
   nuevoTema "01. Bienvenida" 5 1,
-  nuevoTema "99. Cierre" 4 2,
+  nuevoTema "99. Cierre" 4 99,
   nuevoTema "02. Introduccion" 6 2
   ]
 
 -- UPDATE
 
 
-type Msg = NoOp | SortByTitulo | SortByDuracion
+type Msg
+  = NoOp
+  | SortByTitulo
+  | SortByDuracion
+  | Delete Int
 
 
 update : Msg -> Model -> Model
@@ -45,6 +49,8 @@ update action model =
       List.sortBy .titulo model
     SortByDuracion ->
       List.sortBy .duracion model
+    Delete id ->
+      List.filter (\t -> t.id /= id) model
 
 
 -- VIEW
@@ -63,15 +69,18 @@ pageFooter =
     ]
 
 
-capitulo : Tema -> Html msg
+capitulo : Tema -> Html Msg
 capitulo cap =
   li []
     [ span [class "titulo"] [text cap.titulo],
-      span [class "duracion"] [text (toString cap.duracion)]
+      span [class "duracion"] [text (toString cap.duracion)],
+      button
+        [class "delete", onClick (Delete cap.id)]
+        []
     ]
 
 
-capitulos : List Tema -> Html msg
+capitulos : List Tema -> Html Msg
 capitulos temas =
   ul [] (List.map capitulo temas)
 

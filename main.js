@@ -7897,43 +7897,6 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
-var _user$project$Main$capitulo = function (cap) {
-	return A2(
-		_elm_lang$html$Html$li,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		_elm_lang$core$Native_List.fromArray(
-			[
-				A2(
-				_elm_lang$html$Html$span,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Attributes$class('titulo')
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(cap.titulo)
-					])),
-				A2(
-				_elm_lang$html$Html$span,
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html_Attributes$class('duracion')
-					]),
-				_elm_lang$core$Native_List.fromArray(
-					[
-						_elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(cap.duracion))
-					]))
-			]));
-};
-var _user$project$Main$capitulos = function (temas) {
-	return A2(
-		_elm_lang$html$Html$ul,
-		_elm_lang$core$Native_List.fromArray(
-			[]),
-		A2(_elm_lang$core$List$map, _user$project$Main$capitulo, temas));
-};
 var _user$project$Main$pageFooter = A2(
 	_elm_lang$html$Html$footer,
 	_elm_lang$core$Native_List.fromArray(
@@ -7972,11 +7935,18 @@ var _user$project$Main$update = F2(
 						return _.titulo;
 					},
 					model);
-			default:
+			case 'SortByDuracion':
 				return A2(
 					_elm_lang$core$List$sortBy,
 					function (_) {
 						return _.duracion;
+					},
+					model);
+			default:
+				return A2(
+					_elm_lang$core$List$filter,
+					function (t) {
+						return !_elm_lang$core$Native_Utils.eq(t.id, _p0._0);
 					},
 					model);
 		}
@@ -7988,13 +7958,63 @@ var _user$project$Main$nuevoTema = F3(
 var _user$project$Main$modeloInicial = _elm_lang$core$Native_List.fromArray(
 	[
 		A3(_user$project$Main$nuevoTema, '01. Bienvenida', 5, 1),
-		A3(_user$project$Main$nuevoTema, '99. Cierre', 4, 2),
+		A3(_user$project$Main$nuevoTema, '99. Cierre', 4, 99),
 		A3(_user$project$Main$nuevoTema, '02. Introduccion', 6, 2)
 	]);
 var _user$project$Main$Tema = F3(
 	function (a, b, c) {
 		return {titulo: a, duracion: b, id: c};
 	});
+var _user$project$Main$Delete = function (a) {
+	return {ctor: 'Delete', _0: a};
+};
+var _user$project$Main$capitulo = function (cap) {
+	return A2(
+		_elm_lang$html$Html$li,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$span,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$class('titulo')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(cap.titulo)
+					])),
+				A2(
+				_elm_lang$html$Html$span,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$class('duracion')
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(
+						_elm_lang$core$Basics$toString(cap.duracion))
+					])),
+				A2(
+				_elm_lang$html$Html$button,
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html_Attributes$class('delete'),
+						_elm_lang$html$Html_Events$onClick(
+						_user$project$Main$Delete(cap.id))
+					]),
+				_elm_lang$core$Native_List.fromArray(
+					[]))
+			]));
+};
+var _user$project$Main$capitulos = function (temas) {
+	return A2(
+		_elm_lang$html$Html$ul,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		A2(_elm_lang$core$List$map, _user$project$Main$capitulo, temas));
+};
 var _user$project$Main$SortByDuracion = {ctor: 'SortByDuracion'};
 var _user$project$Main$SortByTitulo = {ctor: 'SortByTitulo'};
 var _user$project$Main$view = function (model) {
