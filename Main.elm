@@ -56,6 +56,13 @@ update action model =
 -- VIEW
 
 
+totalDuraciones : List Tema -> Int
+totalDuraciones temas =
+  let
+      duraciones = List.map .duracion temas
+  in
+      List.foldl (+) 0 duraciones
+
 pageHeader : Html
 pageHeader =
   h1 [] [text "Temario"]
@@ -82,9 +89,22 @@ capitulo address cap =
 
 capitulos : Signal.Address Action -> List Tema -> Html
 capitulos address temas =
-  ul [] (List.map (capitulo address) temas)
+  let
+      entradas = List.map (capitulo address) temas 
+      elementos = entradas ++ [ muestraTotal (totalDuraciones temas) ]
+  in
+      ul [] elementos
 
 
+muestraTotal : Int -> Html
+muestraTotal total =
+  li
+    [class "total"]
+    [ span [class "label"] [text "Total"],
+      span [class "duracion"] [text (toString total)]
+    ]
+
+ 
 view : Signal.Address Action -> Model -> Html
 view address model =
   div [id "container"]
