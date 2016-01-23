@@ -26,14 +26,18 @@ nuevoTema titulo duracion id= {
 modeloInicial : Model
 modeloInicial = [
   nuevoTema "01. Bienvenida" 5 1,
-  nuevoTema "99. Cierre" 4 2,
+  nuevoTema "99. Cierre" 4 99,
   nuevoTema "02. Introduccion" 6 2
   ]
 
 -- UPDATE
 
 
-type Action = NoOp | SortByTitulo | SortByDuracion
+type Action
+  = NoOp
+  | SortByTitulo
+  | SortByDuracion
+  | Delete Int
 
 
 update : Action -> Model -> Model
@@ -45,6 +49,8 @@ update action model =
       List.sortBy .titulo model
     SortByDuracion ->
       List.sortBy .duracion model
+    Delete id ->
+      List.filter (\t -> t.id /= id) model
 
 
 -- VIEW
@@ -63,17 +69,20 @@ pageFooter =
     ]
 
 
-capitulo : Tema -> Html
-capitulo cap =
+capitulo : Signal.Address Action -> Tema -> Html
+capitulo address cap =
   li []
     [ span [class "titulo"] [text cap.titulo],
-      span [class "duracion"] [text (toString cap.duracion)]
+      span [class "duracion"] [text (toString cap.duracion)],
+      button
+        [class "delete", onClick address (Delete cap.id)]
+        []
     ]
 
 
-capitulos : List Tema -> Html
-capitulos temas =
-  ul [] (List.map capitulo temas)
+capitulos : Signal.Address Action -> List Tema -> Html
+capitulos address temas =
+  ul [] (List.map (capitulo address) temas)
 
 
 view : Signal.Address Action -> Model -> Html
@@ -86,7 +95,7 @@ view address model =
     button
       [class "sort", onClick address SortByDuracion]
       [text "Duracion"],
-    capitulos model,
+    capitulos address model,
     pageFooter]
 
 
