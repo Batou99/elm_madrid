@@ -3,6 +3,24 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
+-- MODEL
+
+type alias Tema = {
+  titulo : String,
+  duracion : Int,
+  id: Int
+}
+
+
+nuevoTema : String -> Int -> Int -> Tema
+nuevoTema titulo duracion id= {
+  titulo = titulo,
+  duracion = duracion,
+  id = id
+  }
+
+-- VIEW
+
 
 pageHeader : Html msg
 pageHeader =
@@ -17,18 +35,19 @@ pageFooter =
     ]
 
 
-capitulo : String -> Int -> Html msg
-capitulo titulo duracion =
+capitulo : Tema -> Html msg
+capitulo cap =
   li []
-    [ span [class "titulo"] [text titulo],
-      span [class "duracion"] [text (toString duracion)]
+    [ span [class "titulo"] [text cap.titulo],
+      span [class "duracion"] [text (toString cap.duracion)]
     ]
 
 
 capitulos : Html msg
 capitulos =
   ul [] [
-    capitulo "Introduccion" 5]
+    capitulo (nuevoTema "Introduccion" 5 1),
+    capitulo (nuevoTema "Cierre" 4 2)]
 
 
 view : Html msg
