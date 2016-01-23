@@ -7758,20 +7758,44 @@ var _elm_lang$html$Html_Attributes$classList = function (list) {
 };
 var _elm_lang$html$Html_Attributes$style = _elm_lang$virtual_dom$VirtualDom$style;
 
+var _user$project$Main$capitulo = F2(
+	function (titulo, duracion) {
+		return A2(
+			_elm_lang$html$Html$li,
+			_elm_lang$core$Native_List.fromArray(
+				[]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					A2(
+					_elm_lang$html$Html$span,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$class('titulo')
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text(titulo)
+						])),
+					A2(
+					_elm_lang$html$Html$span,
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html_Attributes$class('duracion')
+						]),
+					_elm_lang$core$Native_List.fromArray(
+						[
+							_elm_lang$html$Html$text(
+							_elm_lang$core$Basics$toString(duracion))
+						]))
+				]));
+	});
 var _user$project$Main$capitulos = A2(
 	_elm_lang$html$Html$ul,
 	_elm_lang$core$Native_List.fromArray(
 		[]),
 	_elm_lang$core$Native_List.fromArray(
 		[
-			A2(
-			_elm_lang$html$Html$li,
-			_elm_lang$core$Native_List.fromArray(
-				[]),
-			_elm_lang$core$Native_List.fromArray(
-				[
-					_elm_lang$html$Html$text('Introduccion')
-				]))
+			A2(_user$project$Main$capitulo, 'Introduccion', 5)
 		]));
 var _user$project$Main$pageFooter = A2(
 	_elm_lang$html$Html$footer,

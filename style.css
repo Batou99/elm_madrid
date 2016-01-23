@@ -179,13 +179,13 @@ li.total {
   color: #61a1bc;
 }
 
-li .phrase {
+li .titulo {
   position: absolute;
   top: 18px;
   left: 80px;
 }
 
-li .points {
+li .duracion {
   position: absolute;
   top: 18px;
   right: 80px;
