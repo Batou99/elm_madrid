@@ -2,6 +2,8 @@ module Main where
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import StartApp.Simple
 
 -- MODEL
 
@@ -69,16 +71,29 @@ capitulo cap =
     ]
 
 
-view : Model -> Html
-view model =
+capitulos : List Tema -> Html
+capitulos temas =
+  ul [] (List.map capitulo temas)
+
+
+view : Signal.Address Action -> Model -> Html
+view address model =
   div [id "container"]
     [pageHeader, 
-    ul [] (List.map capitulo model),
+    button
+      [class "sort left", onClick address SortByTitulo]
+      [text "Titulo"],
+    button
+      [class "sort", onClick address SortByDuracion]
+      [text "Duracion"],
+    capitulos model,
     pageFooter]
 
 
-main : Html
+main : Signal Html
 main = 
-  modeloInicial
-    |> update SortByTitulo
-    |> view
+  StartApp.Simple.start
+    { model = update SortByTitulo modeloInicial,
+      view = view,
+      update = update
+    }
