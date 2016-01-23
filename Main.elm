@@ -4,6 +4,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import StartApp.Simple
+import Result
+import String
 
 -- MODEL
 
@@ -50,6 +52,7 @@ type Action
   | Delete Int
   | UpdateTitulo String
   | UpdateDuracion String
+  | Nuevo
 
 
 update : Action -> Model -> Model
@@ -65,6 +68,32 @@ update action model =
       { model | tituloInput = titulo }
     UpdateDuracion duracion ->
       { model | duracionInput = duracion }
+    Nuevo ->
+      let
+          duracion = String.toInt model.duracionInput |> Result.withDefault 0
+          tema = nuevoTema model.tituloInput duracion (model.nextID)
+          valido = validateModel model
+      in
+          case valido of
+            True -> 
+              { model | temas = model.temas ++ [tema], tituloInput = "",
+              duracionInput = "" }
+            False ->
+              model
+
+
+
+validateModel : Model -> Bool
+validateModel model =
+  let
+      tituloValido = not (String.isEmpty model.tituloInput)
+      duracionValida = case (String.toInt model.duracionInput) of
+                         (Err _ ) -> False
+                         _        -> True
+  in
+      tituloValido && duracionValida
+  
+                         
 
 
 -- VIEW
@@ -137,7 +166,7 @@ formularioDeEntrada address model =
         name "duracion",
         on "input" targetValue (\str -> Signal.message address (UpdateDuracion str))
         ] [],
-      button [ class "add" ] [ text "+" ],
+      button [ class "add", onClick address Nuevo ] [ text "+" ],
       h2 []
         [ text (model.tituloInput ++ " " ++ model.duracionInput) ]
     ]
