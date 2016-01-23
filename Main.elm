@@ -2,6 +2,8 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Html.App as Html
 
 -- MODEL
 
@@ -31,10 +33,10 @@ modeloInicial = [
 -- UPDATE
 
 
-type Action = NoOp | SortByTitulo | SortByDuracion
+type Msg = NoOp | SortByTitulo | SortByDuracion
 
 
-update : Action -> Model -> Model
+update : Msg -> Model -> Model
 update action model =
   case action of
     NoOp ->
@@ -69,16 +71,28 @@ capitulo cap =
     ]
 
 
-view : Model -> Html msg
+capitulos : List Tema -> Html msg
+capitulos temas =
+  ul [] (List.map capitulo temas)
+
+
+view : Model -> Html Msg
 view model =
   div [id "container"]
     [pageHeader, 
-    ul [] (List.map capitulo model),
+    button
+      [class "sort left", onClick SortByTitulo]
+      [text "Titulo"],
+    button
+      [class "sort", onClick SortByDuracion]
+      [text "Duracion"],
+    capitulos model,
     pageFooter]
 
 
-main : Html msg
 main = 
-  modeloInicial
-    |> update SortByTitulo
-    |> view
+  Html.beginnerProgram
+    { model = update SortByTitulo modeloInicial,
+      view = view,
+      update = update
+    }
