@@ -49,6 +49,8 @@ type Action
   | SortByTitulo
   | SortByDuracion
   | Delete Int
+  | UpdateTitulo String
+  | UpdateDuracion String
 
 
 update : Action -> Model -> Model
@@ -62,6 +64,10 @@ update action model =
       { model | temas = List.sortBy .duracion model.temas }
     Delete id ->
       { model | temas = List.filter (\t -> t.id /= id) model.temas }
+    UpdateTitulo titulo ->
+      { model | tituloInput = titulo }
+    UpdateDuracion duracion ->
+      { model | duracionInput = duracion }
 
 
 -- VIEW
@@ -115,18 +121,43 @@ muestraTotal total =
       span [class "duracion"] [text (toString total)]
     ]
 
+
+formularioDeEntrada : Signal.Address Action -> Model -> Html
+formularioDeEntrada address model =
+  div []
+    [ input
+      [ type' "text",
+        placeholder "Titulo",
+        value model.tituloInput,
+        name "titulo",
+        autofocus True,
+        on "input" targetValue (Signal.message address << UpdateTitulo)
+        ] [],
+      input
+      [ type' "text",
+        placeholder "Duracion",
+        value model.duracionInput,
+        name "duracion",
+        on "input" targetValue (\str -> Signal.message address (UpdateDuracion str))
+        ] [],
+      button [ class "add" ] [ text "+" ],
+      h2 []
+        [ text (model.tituloInput ++ " " ++ model.duracionInput) ]
+    ]
+
  
 view : Signal.Address Action -> Model -> Html
 view address model =
   div [id "container"]
     [pageHeader, 
+    formularioDeEntrada address model,
+    capitulos address model.temas,
     button
       [class "sort left", onClick address SortByTitulo]
       [text "Titulo"],
     button
       [class "sort", onClick address SortByDuracion]
       [text "Duracion"],
-    capitulos address model.temas,
     pageFooter]
 
 
