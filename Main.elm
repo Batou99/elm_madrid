@@ -13,7 +13,12 @@ type alias Tema = {
   id: Int
 }
 
-type alias Model = List Tema
+type alias Model = {
+  temas : List Tema,
+  tituloInput : String,
+  duracionInput : String,
+  nextID : Int
+}
 
 nuevoTema : String -> Int -> Int -> Tema
 nuevoTema titulo duracion id= {
@@ -24,11 +29,17 @@ nuevoTema titulo duracion id= {
 
 
 modeloInicial : Model
-modeloInicial = [
-  nuevoTema "01. Bienvenida" 5 1,
-  nuevoTema "99. Cierre" 4 99,
-  nuevoTema "02. Introduccion" 6 2
-  ]
+modeloInicial = {
+  temas = [
+    nuevoTema "01. Bienvenida" 5 1,
+    nuevoTema "99. Cierre" 4 99,
+    nuevoTema "02. Introduccion" 6 2
+  ],
+  tituloInput = "",
+  duracionInput = "",
+  nextID = 3
+  }
+
 
 -- UPDATE
 
@@ -46,11 +57,11 @@ update action model =
     NoOp ->
       model
     SortByTitulo ->
-      List.sortBy .titulo model
+      { model | temas = List.sortBy .titulo model.temas }
     SortByDuracion ->
-      List.sortBy .duracion model
+      { model | temas = List.sortBy .duracion model.temas }
     Delete id ->
-      List.filter (\t -> t.id /= id) model
+      { model | temas = List.filter (\t -> t.id /= id) model.temas }
 
 
 -- VIEW
@@ -115,7 +126,7 @@ view address model =
     button
       [class "sort", onClick address SortByDuracion]
       [text "Duracion"],
-    capitulos address model,
+    capitulos address model.temas,
     pageFooter]
 
 
