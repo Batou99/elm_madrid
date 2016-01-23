@@ -1,4 +1,4 @@
-module Main where
+module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -14,5 +14,13 @@ pageFooter =
     ]
 
 
+capitulos =
+  ul [] [
+    li [] [text "Introduccion"]]
+
+
+view =
+  div [id "container"] [pageHeader, capitulos, pageFooter]
+
 main = 
-  div [id "container"] [pageHeader, pageFooter]
+  view
