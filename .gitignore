@@ -1,0 +1,5 @@
+.*.sw*
+*.elmo
+*.elmi
+elm-stuff
+node_modules
