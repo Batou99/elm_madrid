@@ -7813,30 +7813,36 @@ var _user$project$Main$pageHeader = A2(
 		[
 			_elm_lang$html$Html$text('Temario')
 		]));
+var _user$project$Main$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_elm_lang$html$Html_Attributes$id('container')
+			]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				_user$project$Main$pageHeader,
+				A2(
+				_elm_lang$html$Html$ul,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				A2(_elm_lang$core$List$map, _user$project$Main$capitulo, model)),
+				_user$project$Main$pageFooter
+			]));
+};
 var _user$project$Main$nuevoTema = F3(
 	function (titulo, duracion, id) {
 		return {titulo: titulo, duracion: duracion, id: id};
 	});
-var _user$project$Main$capitulos = A2(
-	_elm_lang$html$Html$ul,
-	_elm_lang$core$Native_List.fromArray(
-		[]),
-	_elm_lang$core$Native_List.fromArray(
-		[
-			_user$project$Main$capitulo(
-			A3(_user$project$Main$nuevoTema, 'Introduccion', 5, 1)),
-			_user$project$Main$capitulo(
-			A3(_user$project$Main$nuevoTema, 'Cierre', 4, 2))
-		]));
-var _user$project$Main$view = A2(
-	_elm_lang$html$Html$div,
-	_elm_lang$core$Native_List.fromArray(
-		[
-			_elm_lang$html$Html_Attributes$id('container')
-		]),
-	_elm_lang$core$Native_List.fromArray(
-		[_user$project$Main$pageHeader, _user$project$Main$capitulos, _user$project$Main$pageFooter]));
-var _user$project$Main$main = {main: _user$project$Main$view};
+var _user$project$Main$modeloInicial = _elm_lang$core$Native_List.fromArray(
+	[
+		A3(_user$project$Main$nuevoTema, '01. Introduccion', 5, 1),
+		A3(_user$project$Main$nuevoTema, '99. Cierre', 4, 2)
+	]);
+var _user$project$Main$main = {
+	main: _user$project$Main$view(_user$project$Main$modeloInicial)
+};
 var _user$project$Main$Tema = F3(
 	function (a, b, c) {
 		return {titulo: a, duracion: b, id: c};

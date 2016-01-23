@@ -11,6 +11,7 @@ type alias Tema = {
   id: Int
 }
 
+type alias Model = List Tema
 
 nuevoTema : String -> Int -> Int -> Tema
 nuevoTema titulo duracion id= {
@@ -18,6 +19,13 @@ nuevoTema titulo duracion id= {
   duracion = duracion,
   id = id
   }
+
+
+modeloInicial : Model
+modeloInicial = [
+  nuevoTema "01. Introduccion" 5 1,
+  nuevoTema "99. Cierre" 4 2
+  ]
 
 -- VIEW
 
@@ -43,18 +51,14 @@ capitulo cap =
     ]
 
 
-capitulos : Html msg
-capitulos =
-  ul [] [
-    capitulo (nuevoTema "Introduccion" 5 1),
-    capitulo (nuevoTema "Cierre" 4 2)]
-
-
-view : Html msg
-view =
-  div [id "container"] [pageHeader, capitulos, pageFooter]
+view : Model -> Html msg
+view model =
+  div [id "container"]
+    [pageHeader, 
+    ul [] (List.map capitulo model),
+    pageFooter]
 
 
 main : Html msg
 main = 
-  view
+  view modeloInicial
