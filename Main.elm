@@ -23,9 +23,27 @@ nuevoTema titulo duracion id= {
 
 modeloInicial : Model
 modeloInicial = [
-  nuevoTema "01. Introduccion" 5 1,
-  nuevoTema "99. Cierre" 4 2
+  nuevoTema "01. Bienvenida" 5 1,
+  nuevoTema "99. Cierre" 4 2,
+  nuevoTema "02. Introduccion" 6 2
   ]
+
+-- UPDATE
+
+
+type Action = NoOp | SortByTitulo | SortByDuracion
+
+
+update : Action -> Model -> Model
+update action model =
+  case action of
+    NoOp ->
+      model
+    SortByTitulo ->
+      List.sortBy .titulo model
+    SortByDuracion ->
+      List.sortBy .duracion model
+
 
 -- VIEW
 
@@ -61,4 +79,6 @@ view model =
 
 main : Html msg
 main = 
-  view modeloInicial
+  modeloInicial
+    |> update SortByTitulo
+    |> view
