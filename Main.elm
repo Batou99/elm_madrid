@@ -14,5 +14,13 @@ pageFooter =
     ]
 
 
+capitulos =
+  ul [] [
+    li [] [text "Introduccion"]]
+
+
+view =
+  div [id "container"] [pageHeader, capitulos, pageFooter]
+
 main = 
-  div [id "container"] [pageHeader, pageFooter]
+  view
