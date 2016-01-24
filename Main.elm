@@ -3,9 +3,14 @@ module Main where
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import StartApp.Simple
+import StartApp
 import Result
 import String
+import Effects exposing (Effects, Never)
+import Json.Decode as Js exposing ((:=))
+import Http
+import Task exposing (Task)
+import Maybe exposing (Maybe)
 
 -- MODEL
 
@@ -32,16 +37,38 @@ nuevoTema titulo duracion id= {
 
 modeloInicial : Model
 modeloInicial = {
-  temas = [
-    nuevoTema "01. Bienvenida" 5 1,
-    nuevoTema "99. Cierre" 4 99,
-    nuevoTema "02. Introduccion" 6 2
-  ],
+  temas = [],
   tituloInput = "",
   duracionInput = "",
   nextID = 3
   }
 
+
+init : (Model, Effects Action)
+init = (modeloInicial, findAll)
+
+
+-- EFFECTS
+
+temasDecoder : Js.Decoder (List Tema)
+temasDecoder =
+  Js.list temaDecoder
+
+
+temaDecoder : Js.Decoder Tema
+temaDecoder =
+  Js.object3 Tema
+    ("titulo" := Js.string)
+    ("duracion" := Js.int)
+    ("id" := Js.int)
+
+
+findAll : Effects Action
+findAll =
+  Http.get temasDecoder "temas.json"
+    |> Task.toMaybe
+    |> Task.map SetTemas
+    |> Effects.task
 
 -- UPDATE
 
@@ -54,23 +81,25 @@ type Action
   | UpdateTitulo String
   | UpdateDuracion String
   | Nuevo
+  | SetTemas (Maybe (List Tema))
 
 
-update : Action -> Model -> Model
+update : Action -> Model -> (Model, Effects Action)
 update action model =
   case action of
     NoOp ->
-      model
+      (model, Effects.none)
     SortByTitulo ->
-      { model | temas = List.sortBy .titulo model.temas }
+      ({ model | temas = List.sortBy .titulo model.temas }, Effects.none)
     SortByDuracion ->
-      { model | temas = List.sortBy .duracion model.temas }
+      ({ model | temas = List.sortBy .duracion model.temas }, Effects.none)
     Delete id ->
-      { model | temas = List.filter (\t -> t.id /= id) model.temas }
+      ({ model | temas = List.filter (\t -> t.id /= id) model.temas },
+      Effects.none)
     UpdateTitulo titulo ->
-      { model | tituloInput = titulo }
+      ({ model | tituloInput = titulo }, Effects.none)
     UpdateDuracion duracion ->
-      { model | duracionInput = duracion }
+      ({ model | duracionInput = duracion }, Effects.none)
     Nuevo ->
       let
           duracion = String.toInt model.duracionInput |> Result.withDefault 0
@@ -79,11 +108,16 @@ update action model =
       in
           case valido of
             True -> 
-              { model | temas = model.temas ++ [tema], tituloInput = "",
-              duracionInput = "" }
+              ({ model | temas = model.temas ++ [tema], tituloInput = "",
+              duracionInput = "" }, Effects.none)
             False ->
-              model
-
+              (model, Effects.none)
+    SetTemas response ->
+      case response of
+        Just temas ->
+          ({ model | temas = temas }, Effects.none)
+        Nothing ->
+          (model, Effects.none)
 
 
 validateModel : Model -> Bool
@@ -192,8 +226,19 @@ view address model =
 
 main : Signal Html
 main = 
-  StartApp.Simple.start
-    { model = update SortByTitulo modeloInicial,
+  app.html
+
+
+app = 
+  StartApp.start
+    { 
+      init = init,
       view = view,
-      update = update
+      update = update,
+      inputs = []
     }
+
+
+port tasks : Signal (Task Never ())
+port tasks =
+  app.tasks
