@@ -1,0 +1,5 @@
+[
+  { "titulo": "01. Bienvenida", "duracion": 5, "id": 1 },
+  { "titulo": "02. Introduccion", "duracion": 6, "id": 2 },
+  { "titulo": "99. Cierre", "duracion": 4, "id": 99 }
+]
