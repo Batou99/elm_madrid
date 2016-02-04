@@ -11,7 +11,7 @@ body {
 }
 
 body {
-  background: #eaeaea;
+  background: #454545;
   color: #4f4f4f;
   font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
   line-height: 1.4em;
@@ -20,7 +20,8 @@ body {
 #container {
   width: 500px;
   margin: 50px auto;
-  padding: 0px 50px;
+  padding: 50px;
+  background-color: dimgrey;
 }
 
 h1, h2 {
@@ -28,15 +29,18 @@ h1, h2 {
 }
 
 h1 {
-  font-size: 30px;
-  margin: 0 0 25px 0;
-  color: #61a1bc;
+  font-size: 60px;
+  margin: 10px 0 20px 0;
+  color: #f18e00;
+  text-transform: uppercase;
+  border-bottom: 1px solid #c5c5c5;
+  padding: 0 0 30px 0;
 }
 
 h2 {
   font-size: 25px;
   margin: 30px 0 0 0;
-  color: #797B74;
+  color: #343434;
 }
 
 header {
@@ -46,10 +50,10 @@ header {
 }
 
 footer {
-  color: #a6a6a6;
+  color: #454545;
   margin: 50px auto 0;
   font-size: 12px;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+  /* text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7); */
   text-align: center;
   line-height: 1em;
 }
@@ -62,7 +66,7 @@ button.sort {
   border: 0;
   height: 40px;
   padding: 5px 15px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   letter-spacing: .15em;
   text-transform: uppercase;
@@ -70,11 +74,11 @@ button.sort {
   color: #5e6163;
   background: #D9D9D9;
   position: relative;
-  left: 200px;
+  left: 270px;
 }
 
 button.left {
-  left: 80px;
+  left: 30px;
 }
 
 
@@ -130,14 +134,15 @@ form {
 input[type="text"],
 input[type="number"] {
   display: inline;
-  margin: 0 5px;
+  margin: 0 9px 0 3px;
   width: 200px;
+  height: 55px;
   padding: 15px 20px;
   text-align: center;
-  font-size:1.5em;
+  font-size: 1em;
   outline: none;
-  border: 1px dashed #c5c5c5;
-  color: #797B74;
+  border: 1px solid #c5c5c5;
+  color: #343434;
   background: rgba(0, 0, 0, 0.02);
   box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -147,7 +152,7 @@ input[type="number"] {
 
 input[type="text"]:focus,
 input[type="number"]:focus {
-  border: 1px dashed #61a1bc;
+  border: 1px solid #f18e00;
   outline: 0;
   transition: border-color 0.3s ease-in;
 }
@@ -157,37 +162,43 @@ ul {
   padding: 0;
   list-style: none;
   font-size: 1.5em;
-  font-weight: bold;
+  /* font-weight: bold; */
   text-align: left;
+  /* text-transform: uppercase; */
 }
 
 li {
-  background: #61a1bc;
-  background: #fff;
+  background: #454545;
   height: 25px;
   position: relative;
   padding: 15px 30px;
   margin-bottom: 8px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  color: #fff;
 }
 
 li:hover {
-  background: #fcfcfc;
+  background: #454545;
   /* background: #61a1bc; */
   box-shadow: 0 3px 6px rgba(0,0,0,0.2);
   cursor: pointer;
+  color: #a7a7a7;
+
 }
 
 li.total {
   background: none;
   box-shadow: none;
-  color: #61a1bc;
+  color: #f18e00;
+  text-transform: uppercase;
+  border-top: 1px solid #c5c5c5;
+  margin: 25px 0 0 0;
 }
 
 li .titulo {
   position: absolute;
   top: 18px;
-  left: 80px;
+  left: 45px;
 }
 
 li .duracion {
@@ -219,8 +230,9 @@ li .delete {
 }
 
 li .delete:after {
-  content: '✖';
-  color: #e35885;
+  content: 'X';
+  color: #f18e00;
+  font-weight: bold;
 }
 
 li:hover .delete {
