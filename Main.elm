@@ -214,13 +214,15 @@ view address model =
   div [id "container"]
     [pageHeader, 
     formularioDeEntrada address model,
-    capitulos address model.temas,
+    br [] [],
     button
       [class "sort left", onClick address SortByTitulo]
       [text "Titulo"],
     button
       [class "sort", onClick address SortByDuracion]
       [text "Duracion"],
+    br [] [],
+    capitulos address model.temas,
     pageFooter]
 
 
