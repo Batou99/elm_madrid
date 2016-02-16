@@ -91,6 +91,25 @@ findAll =
     |> Effects.task
 
 
+borrarTema : Maybe Tema -> Effects Action
+borrarTema mTema =
+  case mTema of
+    Just tema ->
+      Http.send Http.defaultSettings
+        {
+          verb = "DELETE",
+          headers = 
+            [ ( "Content-Type", "application/json" ),
+              ( "Accept", "application/json" )
+            ],
+          url = baseUrl ++ "/" ++ (toString tema.id),
+          body = Http.empty
+        }
+        |> Task.toMaybe
+        |> Task.map TemaDeleted
+        |> Effects.task
+    Nothing -> Effects.none
+
 crearTema : Tema -> Effects Action
 crearTema tema =
   let
@@ -126,6 +145,7 @@ type Action
   | Nuevo
   | SetTemas (Maybe (List Tema))
   | TemaPosted (Maybe Tema)
+  | TemaDeleted (Maybe Http.Response)
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -138,8 +158,10 @@ update action model =
     SortByDuracion ->
       ({ model | temas = List.sortBy .duracion model.temas }, Effects.none)
     Delete id ->
-      ({ model | temas = List.filter (\t -> t.id /= id) model.temas },
-      Effects.none)
+      let
+          borrar = List.filter (\t -> t.id == id) model.temas
+      in
+          (model, borrarTema (List.head borrar))
     UpdateTitulo titulo ->
       ({ model | tituloInput = titulo }, Effects.none)
     UpdateDuracion duracion ->
