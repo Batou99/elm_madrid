@@ -24,8 +24,13 @@ type alias Tema = {
 type alias Model = {
   temas : List Tema,
   tituloInput : String,
-  duracionInput : String
+  duracionInput : String,
+  id: Int,
+  modo : Modo
 }
+
+type Modo = Add | Edit
+
 
 nuevoTema : String -> Int -> Int -> Tema
 nuevoTema titulo duracion id= {
@@ -39,7 +44,9 @@ modeloInicial : Model
 modeloInicial = {
   temas = [],
   tituloInput = "",
-  duracionInput = ""
+  duracionInput = "",
+  id = 0,
+  modo = Add
   }
 
 
@@ -132,6 +139,29 @@ crearTema tema =
         |> Effects.task
 
 
+actualizarTema: Tema -> Effects Action
+actualizarTema tema =
+  let
+      body =
+        Http.string (temaEncoder tema)
+  in
+      Http.send Http.defaultSettings
+        {
+          verb = "PUT",
+          headers = 
+            [ ( "Content-Type", "application/json" ),
+              ( "Accept", "application/json" )
+            ],
+          url = baseUrl ++ "/" ++ (toString tema.id),
+          body = body
+        }
+        |> Task.toMaybe
+        |> Task.map TemaUpdated
+        |> Effects.task
+
+
+
+
 -- UPDATE
 
 
@@ -145,7 +175,11 @@ type Action
   | Nuevo
   | SetTemas (Maybe (List Tema))
   | TemaPosted (Maybe Tema)
+  | TemaUpdated (Maybe Http.Response)
   | TemaDeleted (Maybe Http.Response)
+  | Editar Tema
+  | Aceptar
+  | Cancelar
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -193,6 +227,34 @@ update action model =
               ({ filteredModel | temas = filteredModel.temas ++ [tema] }, Effects.none)
             Nothing ->
               (filteredModel, Effects.none)
+    TemaUpdated response ->
+      case response of
+        Just _ -> ({ model | tituloInput = "",
+                             duracionInput = "",
+                             id = 0,
+                             modo = Add }, findAll)
+        Nothing -> (model, Effects.none)
+    TemaDeleted response ->
+      case response of
+        Just _ -> (model, findAll)
+        Nothing -> (model, Effects.none)
+    Editar tema -> ( { model | modo = Edit,
+                               tituloInput = tema.titulo,
+                               duracionInput = (toString tema.duracion),
+                               id = tema.id
+                             }, Effects.none)
+    Aceptar ->
+      let
+          duracion = String.toInt model.duracionInput |> Result.withDefault 0
+          tema = nuevoTema model.tituloInput duracion model.id
+          valido = validateModel model
+      in
+          case valido of
+            True -> 
+              (model, actualizarTema tema)
+            False ->
+              (model, findAll)
+    Cancelar -> ({ model | modo = Add, tituloInput = "", duracionInput = "" }, Effects.none)
 
 
 validateModel : Model -> Bool
@@ -233,7 +295,7 @@ pageFooter =
 
 capitulo : Signal.Address Action -> Tema -> Html
 capitulo address cap =
-  li []
+  li [onClick address (Editar cap)]
     [ span [class "titulo"] [text cap.titulo],
       span [class "duracion"] [text (toString cap.duracion)],
       button
@@ -278,10 +340,22 @@ formularioDeEntrada address model =
         name "duracion",
         on "input" targetValue (\str -> Signal.message address (UpdateDuracion str))
         ] [],
-      button [ class "add", onClick address Nuevo ] [ text "+" ],
+      botones address model,
       h2 []
         [ text (model.tituloInput ++ " " ++ model.duracionInput) ]
     ]
+
+
+botones : Signal.Address Action -> Model -> Html
+botones address model =
+  case model.modo of
+    Add ->
+      span [] [
+        button [ class "add", onClick address Nuevo ] [ text "+" ] ]
+    Edit ->
+    span [] [ 
+        button [ class "add small", onClick address Aceptar ] [ text "✔" ],
+        button [ class "add small", onClick address Cancelar ] [ text "✘" ] ]
 
  
 view : Signal.Address Action -> Model -> Html
