@@ -34,8 +34,7 @@ modeloInicial = [
 
 
 type Action
-  = NoOp
-  | SortByTitulo
+  = SortByTitulo
   | SortByDuracion
   | Delete Int
 
@@ -43,8 +42,6 @@ type Action
 update : Action -> Model -> Model
 update action model =
   case action of
-    NoOp ->
-      model
     SortByTitulo ->
       List.sortBy .titulo model
     SortByDuracion ->
