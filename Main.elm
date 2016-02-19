@@ -294,8 +294,8 @@ pageFooter =
 
 capitulo : Signal.Address Action -> Tema -> Html
 capitulo address cap =
-  li [onClick address (Editar cap)]
-    [ span [class "titulo"] [text cap.titulo],
+  li []
+    [ span [class "titulo", onClick address (Editar cap)] [text cap.titulo],
       span [class "duracion"] [text (toString cap.duracion)],
       button
         [class "delete", onClick address (Delete cap.id)]
