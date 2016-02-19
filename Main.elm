@@ -199,7 +199,9 @@ update action model =
     UpdateTitulo titulo ->
       ({ model | tituloInput = titulo }, Effects.none)
     UpdateDuracion duracion ->
-      ({ model | duracionInput = duracion }, Effects.none)
+      case String.toInt duracion of
+        Ok _ -> ({ model | duracionInput = duracion }, Effects.none)
+        Err _ -> (model, Effects.none)
     Nuevo ->
       let
           duracion = String.toInt model.duracionInput |> Result.withDefault 0
@@ -410,9 +412,11 @@ model : Signal Model
 model =
   Signal.map fst effectsAndModel
 
+
 effects : Signal (Effects Action)
 effects =
   Signal.map snd effectsAndModel
+
 
 html : Signal Html
 html =
