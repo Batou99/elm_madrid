@@ -207,13 +207,13 @@ update action model =
           duracion = String.toInt model.duracionInput |> Result.withDefault 0
           tema = nuevoTema model.tituloInput duracion 0
           valido = validateModel model
+          cleanInputs model = { model | tituloInput = "", duracionInput = "" }
       in
           case valido of
             True -> 
-              ({ model | temas = model.temas ++ [tema], tituloInput = "",
-              duracionInput = "" }, crearTema tema)
+              (cleanInputs { model | temas = model.temas ++ [tema] }, crearTema tema)
             False ->
-              (model, findAll)
+              (cleanInputs model , Effects.none)
     SetTemas response ->
       case response of
         Just temas ->
