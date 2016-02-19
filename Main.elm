@@ -113,7 +113,7 @@ borrarTema mTema =
           body = Http.empty
         }
         |> Task.toMaybe
-        |> Task.map TemaDeleted
+        |> Task.map (TemaDeleted tema.id)
         |> Effects.task
     Nothing -> Effects.none
 
@@ -175,7 +175,7 @@ type Action
   | SetTemas (Maybe (List Tema))
   | TemaPosted (Maybe Tema)
   | TemaUpdated (Maybe Http.Response)
-  | TemaDeleted (Maybe Http.Response)
+  | TemaDeleted Int (Maybe Http.Response)
   | Editar Tema
   | Aceptar
   | Cancelar
@@ -233,9 +233,9 @@ update action model =
                              id = 0,
                              modo = Add }, findAll)
         Nothing -> (model, Effects.none)
-    TemaDeleted response ->
+    TemaDeleted id response ->
       case response of
-        Just _ -> (model, findAll)
+        Just _ -> ({ model | temas = List.filter (\t -> t.id /= id) model.temas }, Effects.none)
         Nothing -> (model, Effects.none)
     Editar tema -> ( { model | modo = Edit,
                                tituloInput = tema.titulo,
