@@ -166,8 +166,7 @@ actualizarTema tema =
 
 
 type Action
-  = NoOp
-  | SortByTitulo
+  = SortByTitulo
   | SortByDuracion
   | Delete Int
   | UpdateTitulo String
@@ -185,8 +184,6 @@ type Action
 update : Action -> Model -> (Model, Effects Action)
 update action model =
   case action of
-    NoOp ->
-      (model, Effects.none)
     SortByTitulo ->
       ({ model | temas = List.sortBy .titulo model.temas }, Effects.none)
     SortByDuracion ->
