@@ -24,8 +24,12 @@ type alias Tema = {
 type alias Model = {
   temas : List Tema,
   tituloInput : String,
-  duracionInput : String
+  duracionInput : String,
+  id: Int,
+  modo: Modo
 }
+
+type Modo = Add | Edit
 
 nuevoTema : String -> Int -> Int -> Tema
 nuevoTema titulo duracion id= {
@@ -39,7 +43,9 @@ modeloInicial : Model
 modeloInicial = {
   temas = [],
   tituloInput = "",
-  duracionInput = ""
+  duracionInput = "",
+  id = 0,
+  modo = Add
   }
 
 
@@ -136,6 +142,27 @@ borrarTema mTema =
       Effects.none
 
 
+actualizarTema : Tema -> Effects Action
+actualizarTema tema =
+  let
+      body =
+        Http.string (temaEncoder tema)
+  in
+      Http.send Http.defaultSettings
+        {
+          verb = "PUT",
+          headers =
+            [ ( "Content-Type", "application/json "),
+              ( "Accept", "application/json")
+            ],
+          url = baseUrl ++ "/" ++ (toString tema.id),
+          body = body
+        }
+        |> Task.toMaybe
+        |> Task.map (TemaUpdated tema)
+        |> Effects.task
+
+
 -- UPDATE
 
 
@@ -149,6 +176,10 @@ type Action
   | SetTemas (Maybe (List Tema))
   | TemaPosted (Maybe Tema)
   | TemaDeleted Int (Maybe Http.Response)
+  | TemaUpdated Tema (Maybe Http.Response)
+  | Aceptar
+  | Cancelar
+  | Editar Tema
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -199,7 +230,45 @@ update action model =
       case response of
         Just _ -> ({ model | temas = List.filter (\t -> t.id /= id) model.temas }, Effects.none)
         Nothing -> (model, Effects.none)
+    TemaUpdated tema response ->
+      let
+          cambiarTema : Tema -> Tema -> Tema
+          cambiarTema new old =
+            case new.id == old.id of
+              True -> new
+              False -> old
+      in
+          case response of
+            Just _ -> (cleanInputs { model | id = 0,
+                                             modo = Add,
+                                             temas = List.map (cambiarTema tema) model.temas
+                                   }, Effects.none)
+            Nothing -> (cleanInputs model, Effects.none)
+    Aceptar ->
+      let
+          duracion = String.toInt model.duracionInput |> Result.withDefault 0
+          tema = nuevoTema model.tituloInput duracion model.id
+          valido = validateModel model
+      in
+          case valido of
+            True -> 
+              (model, actualizarTema tema)
+            False ->
+              (model, Effects.none)
+    Cancelar ->
+      (cleanInputs { model | modo = Add }, Effects.none)
+    Editar tema ->
+      ( { model | modo = Edit,
+                  tituloInput = tema.titulo,
+                  duracionInput = toString tema.duracion,
+                  id = tema.id
+                  }, Effects.none)
 
+
+
+cleanInputs : Model -> Model
+cleanInputs model =
+  { model | tituloInput = "", duracionInput = "" }
 
 
 validateModel : Model -> Bool
@@ -241,7 +310,7 @@ pageFooter =
 capitulo : Signal.Address Action -> Tema -> Html
 capitulo address cap =
   li []
-    [ span [class "titulo"] [text cap.titulo],
+    [ span [class "titulo", onClick address (Editar cap)] [text cap.titulo],
       span [class "duracion"] [text (toString cap.duracion)],
       button
         [class "delete", onClick address (Delete cap.id)]
@@ -267,6 +336,18 @@ muestraTotal total =
     ]
 
 
+botones : Signal.Address Action -> Model -> Html
+botones address model =
+  case model.modo of
+    Add ->
+      span [] [
+        button [ class "add", onClick address Nuevo ] [ text "+" ] ]
+    Edit ->
+      span [] [
+        button [ class "add small", onClick address Aceptar ] [ text "✔" ],
+        button [ class "add small", onClick address Cancelar ] [ text "✘" ] ]
+
+
 formularioDeEntrada : Signal.Address Action -> Model -> Html
 formularioDeEntrada address model =
   div []
@@ -285,7 +366,7 @@ formularioDeEntrada address model =
         name "duracion",
         on "input" targetValue (\str -> Signal.message address (UpdateDuracion str))
         ] [],
-      button [ class "add", onClick address Nuevo ] [ text "+" ],
+      botones address model, 
       h2 []
         [ text (model.tituloInput ++ " " ++ model.duracionInput) ]
     ]
