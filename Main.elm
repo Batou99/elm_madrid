@@ -114,6 +114,28 @@ crearTema tema =
         |> Task.map TemaPosted
         |> Effects.task
 
+
+borrarTema : Maybe Tema -> Effects Action
+borrarTema mTema =
+  case mTema of
+    Just tema ->
+      Http.send Http.defaultSettings
+        {
+          verb = "DELETE",
+          headers =
+            [ ( "Content-Type", "application/json "),
+              ( "Accept", "application/json")
+            ],
+          url = baseUrl ++ "/" ++ (toString tema.id),
+          body = Http.empty
+        }
+        |> Task.toMaybe
+        |> Task.map (TemaDeleted tema.id)
+        |> Effects.task
+    Nothing ->
+      Effects.none
+
+
 -- UPDATE
 
 
@@ -126,6 +148,7 @@ type Action
   | Nuevo
   | SetTemas (Maybe (List Tema))
   | TemaPosted (Maybe Tema)
+  | TemaDeleted Int (Maybe Http.Response)
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -136,8 +159,10 @@ update action model =
     SortByDuracion ->
       ({ model | temas = List.sortBy .duracion model.temas }, Effects.none)
     Delete id ->
-      ({ model | temas = List.filter (\t -> t.id /= id) model.temas },
-      Effects.none)
+      let
+          borrar = List.filter (\t -> t.id /= id) model.temas
+      in
+          (model, borrarTema (List.head borrar))
     UpdateTitulo titulo ->
       ({ model | tituloInput = titulo }, Effects.none)
     UpdateDuracion duracion ->
@@ -170,6 +195,11 @@ update action model =
           ({ model | temas = model.temas ++ [tema] }, Effects.none)
         Nothing ->
           (model, Effects.none)
+    TemaDeleted id response ->
+      case response of
+        Just _ -> ({ model | temas = List.filter (\t -> t.id /= id) model.temas }, Effects.none)
+        Nothing -> (model, Effects.none)
+
 
 
 validateModel : Model -> Bool
