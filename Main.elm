@@ -61,11 +61,14 @@ temaDecoder =
     ("titulo" := Js.string)
     ("duracion" := Js.int)
     ("id" := Js.int)
+baseUrl : String
+baseUrl =
+  "http://dock:9009/api/temas"
 
 
 findAll : Effects Action
 findAll =
-  Http.get temasDecoder "temas.json"
+  Http.get temasDecoder baseUrl
     |> Task.toMaybe
     |> Task.map SetTemas
     |> Effects.task
