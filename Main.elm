@@ -7,7 +7,8 @@ import StartApp
 import Result
 import String
 import Effects exposing (Effects, Never)
-import Json.Decode as Js exposing ((:=))
+import Json.Decode as JsD exposing ((:=))
+import Json.Encode as JsE
 import Http
 import Task exposing (Task)
 import Maybe exposing (Maybe)
@@ -23,8 +24,7 @@ type alias Tema = {
 type alias Model = {
   temas : List Tema,
   tituloInput : String,
-  duracionInput : String,
-  nextID : Int
+  duracionInput : String
 }
 
 nuevoTema : String -> Int -> Int -> Tema
@@ -39,8 +39,7 @@ modeloInicial : Model
 modeloInicial = {
   temas = [],
   tituloInput = "",
-  duracionInput = "",
-  nextID = 3
+  duracionInput = ""
   }
 
 
@@ -50,17 +49,36 @@ init = (modeloInicial, findAll)
 
 -- EFFECTS
 
-temasDecoder : Js.Decoder (List Tema)
+temasDecoder : JsD.Decoder (List Tema)
 temasDecoder =
-  Js.list temaDecoder
+  JsD.list temaDecoder
 
 
-temaDecoder : Js.Decoder Tema
+temaDecoder : JsD.Decoder Tema
 temaDecoder =
-  Js.object3 Tema
-    ("titulo" := Js.string)
-    ("duracion" := Js.int)
-    ("id" := Js.int)
+  JsD.object3 Tema
+    ("titulo" := JsD.string)
+    ("duracion" := JsD.int)
+    ("id" := JsD.int)
+
+
+temaEncoder : Tema -> String
+temaEncoder tema =
+  let
+      inner =
+          JsE.object
+            [ ("titulo", JsE.string tema.titulo),
+              ("duracion", JsE.int tema.duracion) ]
+
+      namespace : String -> JsE.Value
+      namespace name =
+        JsE.object [(name, inner)]
+
+  in
+      JsE.encode 0 <|
+        namespace "tema"
+
+
 baseUrl : String
 baseUrl =
   "http://dock:9009/api/temas"
@@ -73,6 +91,29 @@ findAll =
     |> Task.map SetTemas
     |> Effects.task
 
+
+crearTema : Tema -> Effects Action
+crearTema tema =
+  let
+      body =
+        Http.string (temaEncoder tema)
+
+  in
+      Http.send Http.defaultSettings
+        {
+          verb = "POST",
+          headers =
+            [ ( "Content-Type", "application/json "),
+              ( "Accept", "application/json")
+            ],
+          url = baseUrl,
+          body = body
+        }
+        |> Http.fromJson temaDecoder
+        |> Task.toMaybe
+        |> Task.map TemaPosted
+        |> Effects.task
+
 -- UPDATE
 
 
@@ -84,6 +125,7 @@ type Action
   | UpdateDuracion String
   | Nuevo
   | SetTemas (Maybe (List Tema))
+  | TemaPosted (Maybe Tema)
 
 
 update : Action -> Model -> (Model, Effects Action)
@@ -103,19 +145,24 @@ update action model =
     Nuevo ->
       let
           duracion = String.toInt model.duracionInput |> Result.withDefault 0
-          tema = nuevoTema model.tituloInput duracion (model.nextID)
+          tema = nuevoTema model.tituloInput duracion 0
           valido = validateModel model
       in
           case valido of
             True -> 
-              ({ model | temas = model.temas ++ [tema], tituloInput = "",
-              duracionInput = "" }, Effects.none)
+              (model, crearTema tema)
             False ->
               (model, Effects.none)
     SetTemas response ->
       case response of
         Just temas ->
           ({ model | temas = temas }, Effects.none)
+        Nothing ->
+          (model, Effects.none)
+    TemaPosted response ->
+      case response of
+        Just tema ->
+          ({ model | temas = model.temas ++ [tema] }, Effects.none)
         Nothing ->
           (model, Effects.none)
 
