@@ -387,21 +387,55 @@ view address model =
     pageFooter]
 
 
-main : Signal Html
-main = 
-  app.html
+-- SIGNALS
 
 
-app = 
-  StartApp.start
-    { 
-      init = init,
-      view = view,
-      update = update,
-      inputs = []
-    }
+messages : Signal.Mailbox (List Action)
+messages =
+  Signal.mailbox []
+
+
+address : Signal.Address Action
+address =
+  Signal.forwardTo messages.address (\a -> [a])
+
+
+updateStep : Action -> (Model, Effects Action) -> (Model, Effects Action)
+updateStep action (oldModel, accumulatedEffects) =
+  let
+      (newModel, additionalEffects) = update action oldModel
+  in
+      (newModel, Effects.batch [accumulatedEffects, additionalEffects])
+
+
+loop : List Action -> (Model, Effects Action) -> (Model, Effects Action)
+loop actions (model, _) =
+  List.foldl updateStep (model, Effects.none) actions
+
+
+effectsAndModel : Signal (Model, Effects Action)
+effectsAndModel =
+  Signal.foldp loop init messages.signal
+
+
+model : Signal Model
+model =
+  Signal.map fst effectsAndModel
+
+
+effects : Signal (Effects Action)
+effects =
+  Signal.map snd effectsAndModel
+
+
+html : Signal Html
+html =
+  Signal.map (view address) model
+
+
+main = html
 
 
 port tasks : Signal (Task Never ())
 port tasks =
-  app.tasks
+  Signal.map (Effects.toTask messages.address) effects
