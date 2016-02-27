@@ -25,11 +25,11 @@ type alias Model = {
   temas : List Tema,
   tituloInput : String,
   duracionInput : String,
-  id: Int,
   modo: Modo
 }
 
-type Modo = Add | Edit
+type Modo = Add | Edit Int
+
 
 nuevoTema : String -> Int -> Int -> Tema
 nuevoTema titulo duracion id= {
@@ -44,7 +44,6 @@ modeloInicial = {
   temas = [],
   tituloInput = "",
   duracionInput = "",
-  id = 0,
   modo = Add
   }
 
@@ -239,15 +238,17 @@ update action model =
               False -> old
       in
           case response of
-            Just _ -> (cleanInputs { model | id = 0,
-                                             modo = Add,
+            Just _ -> (cleanInputs { model | modo = Add,
                                              temas = List.map (cambiarTema tema) model.temas
                                    }, Effects.none)
             Nothing -> (cleanInputs model, Effects.none)
     Aceptar ->
       let
           duracion = String.toInt model.duracionInput |> Result.withDefault 0
-          tema = nuevoTema model.tituloInput duracion model.id
+          id = case model.modo of
+            Edit x -> x
+            Add    -> 0
+          tema = nuevoTema model.tituloInput duracion id
           valido = validateModel model
       in
           case valido of
@@ -258,10 +259,9 @@ update action model =
     Cancelar ->
       (cleanInputs { model | modo = Add }, Effects.none)
     Editar tema ->
-      ( { model | modo = Edit,
+      ( { model | modo = Edit tema.id,
                   tituloInput = tema.titulo,
-                  duracionInput = toString tema.duracion,
-                  id = tema.id
+                  duracionInput = toString tema.duracion
                   }, Effects.none)
 
 
@@ -342,7 +342,7 @@ botones address model =
     Add ->
       span [] [
         button [ class "add", onClick address Nuevo ] [ text "+" ] ]
-    Edit ->
+    Edit _ ->
       span [] [
         button [ class "add small", onClick address Aceptar ] [ text "✔" ],
         button [ class "add small", onClick address Cancelar ] [ text "✘" ] ]
