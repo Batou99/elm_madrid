@@ -1,5 +1,6 @@
 .*.sw*
 *.elmo
 *.elmi
+main.js
 elm-stuff
 node_modules
